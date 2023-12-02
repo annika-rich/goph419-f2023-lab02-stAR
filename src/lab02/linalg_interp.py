@@ -106,7 +106,6 @@ def gauss_iter_solver(A, b, x0 = None, tol = 1e-8, alg = 'seidel'):
     
     # set iteration counter
     itr = 1
-
     while np.max(eps_a) > tol and itr < maxit:
         if alg == 'jacobi':
             x_old = np.array(x0)
