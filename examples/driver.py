@@ -98,7 +98,7 @@ def main():
     axs[1][2].set_title('Third Order')
     axs[1][2].legend()
 
-    plt.savefig('figures/density vs temperature graphs')
+    plt.savefig('figures/density_vs_temperature graphs')
 
 
     
