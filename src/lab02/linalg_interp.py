@@ -130,19 +130,158 @@ def spline_function(xd, yd, order = 3):
 
     Parameters
     ----------
-    xd: array-Like of floats, shape(M, M)
+    xd: array-Like of floats
         independent variables
 
-    yd: array-like of floats, shape(M, M)
+    yd: array-like of floats
         dependent variables
+        must be same shape as xd
 
     order: int
            possible values of polynomial order are 1st, 2nd, and 3rd order (i.e., 1, 2, 3)
+           default order is 3
 
     Returns
     -------
     function 
         takes 1 parameter (float or array-like of floats)
         returns interpolated y-values
+
+    Raises
+    ------
+    ValuError
+        if shape xd is not equal to yd
+        if xd has repeated values (number of independent variables is not equal to the number of dependent variables)
     """
-    pass
+    # make sure xd and yd are arrays
+    xd = np.array(xd, dtype = float)
+    yd = np.array(yd, dtype = float)
+
+    # check that xd and yd have the same length
+    if (m := len(xd)) != (n := len(yd)):
+        raise ValueError(f"The length of xd ({m}) is not equal to the lengtht of yd ({n}), xd and yd must be the same shape")
+
+    # check for repeated values of xd
+    unique = np.unique(xd)
+    if (u := len(unique)) != m:
+        raise ValueError(f"The number of independent variables ({u}) is not equal to the number of dependent variable ({n}).\nThe array xd has repeated values.")
+
+    # check that xd values are in increasing order
+    xd = np.sort(xd, axis = 0)
+    # double check they x-values sorted properly
+    if (all (xd[i] >= xd[i+1] for i in range(m-1))):
+        raise ValueError(f"The values of xd:\n{xd}\nMust be in increasing order.")
+    
+    if order not in [1, 2, 3]:
+        raise ValueError(f"The order given ({order}) is not 1, 2, or 3")
+
+    # deetermine differences for xd and yd
+    diff_x = np.diff(xd)
+    diff_y = np.diff(yd)
+
+    # determine first order divided difference
+    div_dif1 = diff_y / diff_x
+
+    if order == 1:
+        def spline_1(x):
+            """Linear spline function.
+
+            Inputs
+            ------
+            x: float or array-like of floats
+
+            Returns
+            -------
+            Interpolated value of y (or y-values)
+            """
+            # determine spline function coefficients a and b
+            a = yd[:-1]
+            b = div_dif1[:-1]
+            # determine spline function between known data points in xd
+            for xi in x:
+                # find indices to determine where xd is larger than xi to interpolate along interval between points
+                i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
+                i = np.where(i < 0, 0, i)
+                # calculate spline functions
+                y = a[i-1] + b[i-1] * (x - xd[i-1])
+            return y
+        return spline_1
+
+    elif order == 2:
+        def spline_2(x):
+            """Quadratic Spline function.
+
+            Inputs
+            ------
+            x: float or array-like of floats
+
+            Returns
+            -------
+            Interpolated value of y (or y-values)
+            """
+            # set up linear system of equations to solve for a, b, c unknowns
+            # set up RHS
+            N = m - 1
+            rhs = np.zeros(N)
+            rhs[1:] = np.diff(div_dif1, axis = 0)
+            # set up coefficient matrix
+            A = np.zeros((N, N))
+            # values of first and last rows of A
+            A[0,0:2] = [1, -1]
+            A[1:,:-1] += np.diag(diff_x[:-1])
+            A[1:,1:] += np.diag(diff_x[1:])
+            # determine coefficients
+            c = np.linalg.solve(A, rhs)
+            # c = gauss_iter_solver(A, rhs)
+            b = diff_y - (c * diff_x)
+            a = yd[:-1]
+            # calculate spline functions
+            for xi in x:
+                # determine indexing intervals where spline function will interpolate between points
+                i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
+                i = np.where(i < 0, 0, i)
+                # spline function over at index i
+                y = a[i] + b[i] * (x - xd[i]) + c[i] * (x - xd[i]) ** 2
+            return y
+        return spline_2
+
+    elif order == 3:
+        def spline_3(x):
+            """Cubic Spline function.
+
+            Inputs
+            ------
+            x: float or array-like of floats
+
+            Returns
+            -------
+            Interpolated value of y (or y-values)
+            """
+            # set up linear system of equations to solve for unknowns
+            N = m
+            div_dif2 = np.diff(div_dif1)
+            rhs = np.zeros(N)
+            rhs[1:-1] = 3 * div_dif2
+            # set up coefficient matrix
+            A = np.zeros((N, N))
+            A[1, 0] = diff_x[0]
+            A[-2, -1] = diff_x[-1]
+            A[0,:3] = [-diff_x[1], (diff_x[0] + diff_x[1]), -diff_x[-2]]
+            A[-1,-3:] = [-diff_x[-1], (diff_x[-1]+diff_x[-2]), -diff_x[-2]]
+            A[1:-1,:-2] += np.diag(diff_x[:-1])
+            A[1:-1,1:-1] += np.diag(2 * (diff_x[:-1] + diff_x[1:]))
+            A[1:-1,2:] += np.diag(diff_x[1:])
+            # calculate coefficients
+            c = np.linalg.solve(A, rhs)
+            #c = gauss_iter_solver(A, rhs)
+            d = np.diff(c) / (diff_x * 3)
+            b = div_dif1 - diff_x * (c[:-1] + c[1:] * 2) / 3
+            # get indexes for spline function interpolation
+            i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
+            i = np.where(i < 0, 0, i)
+            y = np.array([(yd[i] + b[i] * (xi - xd[i]) + c[i] * (xi - xd[i]) ** 2 + d[i] * (xi - xd[i]) ** 3) for i, xi in zip(i, x)])
+            return y
+        return spline_3
+
+
+
