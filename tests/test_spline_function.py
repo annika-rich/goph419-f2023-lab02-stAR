@@ -6,6 +6,7 @@ from scipy.interpolate import UnivariateSpline
 import matplotlib.pyplot as plt
 
 def test_spline_function():
+    # test to check whether spline function returns values as expected from linear, quadratic, and cubic funcitons
     # generate x values
     x = np.linspace(-20, 20, 20)
 
@@ -40,6 +41,38 @@ def test_spline_function():
     plt.legend()
     
     plt.savefig('tests/spline_test1')
+    plt.close('all')
+
+    # check spline_function(order = 3) against scipy.interpolate.UnivariateSpline() function
+    xd = np.linspace(1, 30, 50)
+    yd = np.exp(xd)
+
+    f_scipy = UnivariateSpline(xd, yd, k = 3, s = 0, ext = 'raise')
+    y_scipy = f_scipy(xd)
+
+    f_spline = spline_function(xd, yd, order = 3)
+    y_spline = f_spline(xd)
+
+    fig, axs = plt.subplots(nrows = 1, ncols = 2, figsize = (16,12))
+
+    axs[0].plot(xd, yd, 'ko', label = 'data')
+    axs[0].set_xlabel('x')
+    axs[0].set_ylabel('y')
+
+    axs[1].plot(xd, yd, 'ko', label = 'data')
+    axs[1].set_xlabel('x')
+    axs[1].set_ylabel('y')
+
+    axs[0].plot(xd, y_scipy, 'b', label = 'scipy interpolation')
+    axs[1].plot(xd, y_spline, 'm', label = 'GOPH419 spline_function')
+
+    fig.suptitle('Scipy Univariate Spline Function vs GOPH419 Spline Function')
+    fig.set_label('y')
+    axs[0].legend()
+    axs[1].legend()
+
+    plt.savefig('tests/spline_test2')
+
 
 if __name__ == "__main__":
     test_spline_function()
