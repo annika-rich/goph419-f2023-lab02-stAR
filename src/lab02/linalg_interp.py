@@ -233,7 +233,7 @@ def spline_function(xd, yd, order = 3):
             # determine coefficients
             c = np.linalg.solve(A, rhs)
             # c = gauss_iter_solver(A, rhs)
-            b = diff_y - (c * diff_x)
+            b = div_dif1 - (c * diff_x)
             a = yd[:-1]
             # calculate spline functions
             for xi in x:

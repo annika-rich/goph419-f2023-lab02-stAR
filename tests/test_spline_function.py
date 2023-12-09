@@ -64,7 +64,7 @@ def test_spline_function():
     axs[1].set_ylabel('y')
 
     axs[0].plot(xd, y_scipy, 'b', label = 'scipy interpolation')
-    axs[1].plot(xd, y_spline, 'm', label = 'GOPH419 spline_function')
+    axs[1].plot(xd, y_spline, 'm', label = 'GOPH419 cubic spline_function')
 
     fig.suptitle('Scipy Univariate Spline Function vs GOPH419 Spline Function')
     fig.set_label('y')
