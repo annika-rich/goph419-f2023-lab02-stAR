@@ -183,6 +183,9 @@ def spline_function(xd, yd, order = 3):
     # determine first order divided difference
     div_dif1 = diff_y / diff_x
 
+    # set a coefficients
+    a = yd[:-1]
+
     if order == 1:
         def spline_1(x):
             """Linear spline function.
@@ -196,7 +199,6 @@ def spline_function(xd, yd, order = 3):
             Interpolated value of y (or y-values)
             """
             # determine spline function coefficients a and b
-            a = yd[:-1]
             b = div_dif1
             # determine spline function between known data points in xd
             # find indices to determine where xd is larger than xi to interpolate along interval between points
@@ -234,7 +236,6 @@ def spline_function(xd, yd, order = 3):
             c = np.linalg.solve(A, rhs)
             # c = gauss_iter_solver(A, rhs)
             b = div_dif1 - (c * diff_x)
-            a = yd[:-1]
             # calculate spline functions
             # determine indexing intervals where spline function will interpolate between points
             i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
@@ -257,12 +258,11 @@ def spline_function(xd, yd, order = 3):
             Interpolated value of y (or y-values)
             """
             # set up linear system of equations to solve for unknowns
-            N = m
             div_dif2 = np.diff(div_dif1)
-            rhs = np.zeros(N)
+            rhs = np.zeros(m)
             rhs[1:-1] = 3 * div_dif2
             # set up coefficient matrix
-            A = np.zeros((N, N))
+            A = np.zeros((m, m))
             A[1, 0] = diff_x[0]
             A[-2, -1] = diff_x[-1]
             A[0,:3] = [-diff_x[1], (diff_x[0] + diff_x[1]), -diff_x[-2]]
@@ -275,7 +275,6 @@ def spline_function(xd, yd, order = 3):
             #c = gauss_iter_solver(A, rhs)
             d = np.diff(c) / (diff_x * 3)
             b = div_dif1 - diff_x * (c[:-1] + c[1:] * 2) / 3
-            a = yd[:-1]
             # get indexes for spline function interpolation
             i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
             i = np.where(i < 0, 0, i)
