@@ -280,7 +280,6 @@ def spline_function(xd, yd, order = 3):
             i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
             i = np.where(i < 0, 0, i)
             y = a[i] + b[i] * (x - xd[i]) + c[i]*(x - xd[i]) ** 2 + d[i] * (x - xd[i]) ** 3
-            #y = np.array([(yd[i] + b[i] * (xi - xd[i]) + c[i] * (xi - xd[i]) ** 2 + d[i] * (xi - xd[i]) ** 3) for i, xi in zip(i, x)])
             return y
         return spline_3
 
