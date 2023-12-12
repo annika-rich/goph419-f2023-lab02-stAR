@@ -152,6 +152,7 @@ def spline_function(xd, yd, order = 3):
     ValuError
         if shape xd is not equal to yd
         if xd has repeated values (number of independent variables is not equal to the number of dependent variables)
+        if xd is not in increasing order
     """
     # make sure xd and yd are arrays
     xd = np.array(xd, dtype = float)
