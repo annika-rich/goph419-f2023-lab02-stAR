@@ -197,14 +197,14 @@ def spline_function(xd, yd, order = 3):
             """
             # determine spline function coefficients a and b
             a = yd[:-1]
-            b = div_dif1[:-1]
+            b = div_dif1
             # determine spline function between known data points in xd
             for xi in x:
                 # find indices to determine where xd is larger than xi to interpolate along interval between points
                 i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
                 i = np.where(i < 0, 0, i)
                 # calculate spline functions
-                y = a[i-1] + b[i-1] * (x - xd[i-1])
+                y = a[i] + b[i] * (x - xd[i])
             return y
         return spline_1
 
