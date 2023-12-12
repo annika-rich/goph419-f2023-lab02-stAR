@@ -275,10 +275,12 @@ def spline_function(xd, yd, order = 3):
             #c = gauss_iter_solver(A, rhs)
             d = np.diff(c) / (diff_x * 3)
             b = div_dif1 - diff_x * (c[:-1] + c[1:] * 2) / 3
+            a = yd[:-1]
             # get indexes for spline function interpolation
             i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
             i = np.where(i < 0, 0, i)
-            y = np.array([(yd[i] + b[i] * (xi - xd[i]) + c[i] * (xi - xd[i]) ** 2 + d[i] * (xi - xd[i]) ** 3) for i, xi in zip(i, x)])
+            y = a[i] + b[i] * (x - xd[i]) + c[i]*(x - xd[i]) ** 2 + d[i] * (x - xd[i]) ** 3
+            #y = np.array([(yd[i] + b[i] * (xi - xd[i]) + c[i] * (xi - xd[i]) ** 2 + d[i] * (xi - xd[i]) ** 3) for i, xi in zip(i, x)])
             return y
         return spline_3
 
