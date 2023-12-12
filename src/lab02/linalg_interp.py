@@ -199,12 +199,11 @@ def spline_function(xd, yd, order = 3):
             a = yd[:-1]
             b = div_dif1
             # determine spline function between known data points in xd
-            for xi in x:
-                # find indices to determine where xd is larger than xi to interpolate along interval between points
-                i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
-                i = np.where(i < 0, 0, i)
-                # calculate spline functions
-                y = a[i] + b[i] * (x - xd[i])
+            # find indices to determine where xd is larger than xi to interpolate along interval between points
+            i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
+            i = np.where(i < 0, 0, i)
+            # calculate spline functions
+            y = a[i] + b[i] * (x - xd[i])
             return y
         return spline_1
 
@@ -237,12 +236,11 @@ def spline_function(xd, yd, order = 3):
             b = div_dif1 - (c * diff_x)
             a = yd[:-1]
             # calculate spline functions
-            for xi in x:
-                # determine indexing intervals where spline function will interpolate between points
-                i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
-                i = np.where(i < 0, 0, i)
-                # spline function over at index i
-                y = a[i] + b[i] * (x - xd[i]) + c[i] * (x - xd[i]) ** 2
+            # determine indexing intervals where spline function will interpolate between points
+            i = np.array([np.nonzero(xd >= xi)[0][0] - 1 for xi in x])
+            i = np.where(i < 0, 0, i)
+            # spline function over at index i
+            y = a[i] + b[i] * (x - xd[i]) + c[i] * (x - xd[i]) ** 2
             return y
         return spline_2
 
